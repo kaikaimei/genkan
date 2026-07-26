@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>玄関 GENKAN — 海外の欲しいものへ、迷わず入る</title>
+<style>
+  :root{
+    --sumi:#1c1a17;        /* 墨 */
+    --sumi-soft:#4a453e;   /* 薄墨 */
+    --washi:#f3efe6;       /* 和紙 */
+    --washi-deep:#e7e0d1;  /* 生成り */
+    --shu:#b8442f;         /* 朱 — 通行手形/注意の色 */
+    --ai:#2f4858;          /* 藍 — 入口の色 */
+    --line:#d8cfbc;
+    --gold:#a9853f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--washi);
+    color:var(--sumi);
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px}
+
+  /* ── のれん(ヘッダー) ── */
+  header{padding:64px 20px 40px;text-align:center;position:relative}
+  .noren{
+    display:inline-block;font-size:13px;letter-spacing:.5em;
+    color:var(--sumi-soft);padding-left:.5em;margin-bottom:18px;
+  }
+  .logo{
+    font-size:clamp(52px,14vw,88px);font-weight:600;
+    letter-spacing:.12em;line-height:1;
+    display:flex;justify-content:center;gap:.08em;
+  }
+  .logo span{display:inline-block}
+  .logo .en{
+    display:block;font-family:"Georgia",serif;font-size:15px;
+    letter-spacing:.55em;color:var(--gold);margin-top:20px;
+    padding-left:.55em;font-weight:400;
+  }
+  .tagline{
+    margin-top:26px;font-size:16px;color:var(--sumi-soft);
+    line-height:1.9;
+  }
+
+  /* ── 検索窓 ── */
+  .search{max-width:600px;margin:30px auto 0;padding:0 20px}
+  .search-row{display:flex;border:1.5px solid var(--sumi);background:#fbf9f3}
+  .search-row input{flex:1;border:none;background:transparent;padding:15px 18px;font-family:inherit;font-size:16px;color:var(--sumi);outline:none}
+  .search-row input::placeholder{color:#a99f8c}
+  .search-row button{border:none;background:var(--sumi);color:var(--washi);padding:0 22px;font-family:"Georgia",serif;font-size:17px;cursor:pointer;letter-spacing:.05em}
+  .search-row button:hover{background:var(--ai)}
+  .search-hint{text-align:center;font-size:12.5px;color:var(--sumi-soft);margin-top:10px;line-height:1.7}
+  .search-hint b{color:var(--shu)}
+  .clearbtn{background:none;border:none;color:var(--gold);font-family:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline;padding:0}
+
+  /* ── 説明の帯 ── */
+  .intro{
+    background:var(--washi-deep);border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:26px 20px;margin-top:16px;
+  }
+  .intro p{max-width:640px;margin:0 auto;font-size:14.5px;color:var(--sumi-soft)}
+  .intro b{color:var(--sumi);font-weight:600}
+
+  /* ── 区画見出し ── */
+  section{padding:48px 0 8px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
+  .sec-mark{
+    font-family:"Georgia",serif;font-size:13px;color:var(--gold);
+    border:1px solid var(--gold);border-radius:50%;
+    width:26px;height:26px;display:grid;place-items:center;flex:none;
+  }
+  .sec-head h2{font-size:21px;font-weight:600;letter-spacing:.04em}
+  .sec-note{font-size:13.5px;color:var(--sumi-soft);margin:2px 0 22px 40px}
+
+  /* ── 入口カード ── */
+  .doors{display:flex;flex-direction:column;gap:10px}
+  .door{
+    display:block;text-decoration:none;color:inherit;
+    background:#fbf9f3;border:1px solid var(--line);
+    border-left:3px solid var(--ai);
+    padding:16px 18px;transition:transform .12s ease,box-shadow .12s ease;
+  }
+  .door:hover{transform:translateX(4px);box-shadow:-2px 3px 0 var(--washi-deep)}
+  .door:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
+  .door-top{display:flex;align-items:center;gap:10px}
+  .door-name{font-size:18px;font-weight:600}
+  .door-name .arrow{font-family:Georgia,serif;color:var(--ai);font-size:15px}
+  .door-tag{font-size:13px;color:var(--sumi-soft);margin-top:4px}
+  .door .find{display:none;font-size:12.5px;color:var(--ai);margin-top:7px;font-weight:600;letter-spacing:.03em}
+  .door .find::before{content:"\2192\00a0"}
+  body.searching .door .find{display:block}
+  body.searching .door-tag{opacity:.55}
+  .door.gated .find{color:var(--shu)}
+  .door[data-manual] .find{color:var(--gold)}
+  .door[data-manual] .find::before{content:"\25c7\00a0"}
+
+  /* 通行手形が要る入口 */
+  .door.gated{border-left-color:var(--shu)}
+  .door.gated:hover{box-shadow:-2px 3px 0 #f0dcd4}
+  .stamp{
+    font-size:11px;color:var(--shu);border:1px solid var(--shu);
+    padding:1px 8px;letter-spacing:.15em;flex:none;
+  }
+
+  /* ── MyUS案内(折りたたみ) ── */
+  .tegata{margin-top:12px;border:1px dashed var(--shu);background:#fcf6f3}
+  .tegata summary{
+    cursor:pointer;padding:14px 18px;font-size:14.5px;color:var(--shu);
+    font-weight:600;letter-spacing:.03em;list-style:none;
+    display:flex;align-items:center;gap:10px;
+  }
+  .tegata summary::-webkit-details-marker{display:none}
+  .tegata summary::before{content:"通行手形";font-size:10px;border:1px solid var(--shu);padding:2px 6px;letter-spacing:.1em}
+  .tegata summary .tw{margin-left:auto;font-family:Georgia,serif;transition:transform .2s}
+  .tegata[open] summary .tw{transform:rotate(90deg)}
+  .tegata .body{padding:4px 22px 22px;font-size:14px;color:var(--sumi-soft)}
+  .tegata ol{margin:8px 0 8px 1.2em}
+  .tegata li{margin:9px 0;padding-left:4px}
+  .tegata li b{color:var(--sumi)}
+  /* suite解説ボックス */
+  .suite-box{
+    background:#fff;border:1px solid var(--line);border-left:3px solid var(--gold);
+    padding:13px 15px;margin:14px 0;font-size:13.5px;
+  }
+  .suite-box b{color:var(--sumi)}
+  .suite-box .kw{color:var(--gold);font-weight:600;font-family:Georgia,serif;letter-spacing:.02em}
+
+  /* 住所入力の対応表 */
+  .addr-cap{font-size:13.5px;color:var(--sumi);font-weight:600;margin:18px 0 8px}
+  .addr-cap span{font-weight:400;color:var(--sumi-soft);font-size:12.5px}
+  .addr-table{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;border:1px solid var(--line)}
+  .addr-table th,.addr-table td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  .addr-table th{background:var(--washi-deep);color:var(--sumi);font-weight:600;white-space:nowrap;width:38%}
+  .addr-table td{font-family:"Courier New",monospace;color:var(--ai)}
+  .addr-table tr.hi td{color:var(--shu);font-weight:700}
+  .addr-note{font-size:12px;color:var(--sumi-soft);margin-top:8px;line-height:1.7}
+
+  .caution{
+    margin-top:16px;background:#fff;border:1px solid var(--shu);
+    padding:12px 14px;font-size:13px;color:var(--shu);
+  }
+  .caution b{display:block;margin-bottom:4px;letter-spacing:.08em}
+  .stub{color:var(--sumi-soft);font-size:12.5px;font-style:normal;opacity:.8;margin-top:14px;border-top:1px dotted var(--line);padding-top:12px}
+
+  /* ── 足元 ── */
+  footer{margin-top:64px;border-top:1px solid var(--line);padding:30px 20px 60px;text-align:center}
+  footer p{font-size:12px;color:var(--sumi-soft);letter-spacing:.05em;line-height:2}
+  .ver{font-family:Georgia,serif;color:var(--gold)}
+
+  @media (max-width:480px){
+    header{padding:48px 20px 32px}
+    .sec-note{margin-left:0}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="noren">よ う こ そ</div>
+  <div class="logo">
+    <span>玄</span><span>関</span>
+    <span class="en">GENKAN</span>
+  </div>
+  <p class="tagline">
+    海外にしかない、その一点へ。<br>
+    どの入口から入ればいいか、ここで決める。
+  </p>
+
+  <div class="search">
+    <div class="search-row">
+      <input id="q" type="text" placeholder="探しものを入力（例：Old Spice Elklord）" autocomplete="off" aria-label="探しもの">
+      <button id="go" aria-label="探す">探す</button>
+    </div>
+    <p class="search-hint" id="hint">言葉を入れて「探す」を押すと、各入口がその検索リンクに変わります。</p>
+  </div>
+</header>
+
+<div class="intro">
+  <p>
+    欲しいものが海外にあるとき、難しいのは「買うこと」より
+    <b>どのサイトのどの入口から入ればいいか</b>です。
+    玄関は、国内・海外の主な入口をひとつに並べ、
+    <b>壁のある入口にだけ、越え方（通行手形）を添えました</b>。
+    まず国内を確認し、無ければ海外へ——上から順にどうぞ。
+  </p>
+</div>
+
+<div class="wrap">
+
+  <!-- 区画1:そのまま入れる -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-mark">一</div>
+      <h2>そのまま入れる入口</h2>
+    </div>
+    <p class="sec-note">日本へ届く商品だけが並ぶので、特別な手続きはいりません。国内から。</p>
+
+    <div class="doors">
+      <a class="door" data-tpl="https://jp.mercari.com/search?keyword=%s" href="https://jp.mercari.com/" target="_blank" rel="noopener">
+        <div class="door-top"><span class="door-name">メルカリ <span class="arrow">↗</span></span></div>
+        <div class="door-tag">まず最初に。国内の中古・掘り出し物はここに集まる。</div>
+        <div class="find">メルカリで探す</div>
+      </a>
+      <a class="door" data-tpl="https://paypayfleamarket.yahoo.co.jp/search/%s" href="https://paypayfleamarket.yahoo.co.jp/" target="_blank" rel="noopener">
+        <div class="door-top"><span class="door-name">ヤフーフリマ <span class="arrow">↗</span></span></div>
+        <div class="door-tag">メルカリで無ければ次に。出品者層が少し違う。</div>
+        <div class="find">ヤフーフリマで探す</div>
+      </a>
+      <a class="door" data-tpl="https://search.rakuten.co.jp/search/mall/%s/" href="https://www.rakuten.co.jp/" target="_blank" rel="noopener">
+        <div class="door-top"><span class="door-name">楽天市場 <span class="arrow">↗</span></span></div>
+        <div class="door-tag">並行輸入の新品を扱う店が見つかることがある。</div>
+        <div class="find">楽天市場で探す</div>
+      </a>
+      <a class="door" data-tpl="https://shopping.yahoo.co.jp/search?p=%s" href="https://shopping.yahoo.co.jp/" target="_blank" rel="noopener">
+        <div class="door-top"><span class="door-name">Yahoo!ショッピング <span class="arrow">↗</span></span></div>
+        <div class="door-tag">三大モールの一角。並行輸入店やセール時の掘り出し物に。</div>
+        <div class="find">Yahoo!ショッピングで探す</div>
+      </a>
+      <a class="door" data-tpl="https://www.amazon.co.jp/s?k=%s" href="https://www.amazon.co.jp/" target="_blank" rel="noopener">
+        <div class="door-top"><span class="door-name">Amazon（日本） <span class="arrow">↗</span></span></div>
+        <div class="door-tag">国内在庫と、日本へ送る海外セラー。まず在庫確認に。</div>
+        <div class="find">Amazon（日本）で探す</div>
+      </a>
+      <a class="door" data-tpl="https://www.amazon.com/s?k=%s" href="https://www.amazon.com/" target="_blank" rel="noopener">
+        <div class="door-top"><span class="door-name">Amazon（米国） <span class="arrow">↗</span></span></div>
+        <div class="door-tag">日本へ送れる品も多い。送れない品は下の入口へ。</div>
+        <div class="find">Amazon（米国）で探す</div>
+      </a>
+      <a class="door" data-tpl="https://www.suruga-ya.jp/search?search_word=%s" href="https://www.suruga-ya.jp/" target="_blank" rel="noopener">
+        <div class="door-top"><span class="door-name">駿河屋 <span class="arrow">↗</span></span></div>
+        <div class="door-tag">中古・廃盤・絶版のホビー品に強い国内最大級。「もう売っていない物」を国内で探すなら。</div>
+        <div class="find">駿河屋で探す</div>
+      </a>
+      <a class="door" data-tpl="https://www.qoo10.jp/gmkt.inc/Search/Default.aspx?keyword=%s" href="https://www.qoo10.jp/" target="_blank" rel="noopener">
+        <div class="door-top"><span class="door-name">Qoo10 <span class="arrow">↗</span></span></div>
+        <div class="door-tag">eBay Japan運営。コスメ・K-POP・海外限定グッズに強い。</div>
+        <div class="find">Qoo10で探す</div>
+      </a>
+      <a class="door" data-tpl="https://www.ebay.com/sch/i.html?_nkw=%s" href="https://www.ebay.com/" target="_blank" rel="noopener">
+        <div class="door-top"><span class="door-name">eBay <span class="arrow">↗</span></span></div>
+        <div class="door-tag">日本から見ると、日本へ送れる商品だけが表示される。見えている品はそのまま買える。</div>
+        <div class="find">eBayで探す</div>
+      </a>
+      <a class="door" data-tpl="https://www.google.com/search?q=%s+site:sekaimon.com" href="https://www.sekaimon.com/" target="_blank" rel="noopener">
+        <div class="door-top"><span class="door-name">セカイモン <span class="arrow">↗</span></span></div>
+        <div class="door-tag">eBayを日本語で。手数料は高めだが、全部おまかせできる。</div>
+        <div class="find">セカイモンで探す（Google経由）</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 区画2:通行手形が要る -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-mark">二</div>
+      <h2>通行手形が要る入口</h2>
+    </div>
+    <p class="sec-note">日本からは見えない・送れない「米国内だけの品」へ。越え方を添えます。</p>
+
+    <div class="doors">
+      <a class="door gated" data-tpl="https://picclick.com/?q=%s" href="https://picclick.com/" target="_blank" rel="noopener">
+        <div class="door-top">
+          <span class="door-name">PicClick ＋ eBay <span class="arrow">↗</span></span>
+          <span class="stamp">要・手形</span>
+        </div>
+        <div class="door-tag">日本のeBay検索では隠れる「米国内限定の品」が、ここでは見えて、買える。ただし届け先は米国内のみ。</div>
+        <div class="find">PicClick（米国限定）で探す</div>
+      </a>
+    </div>
+
+    <!-- 通行手形:MyUS案内 -->
+    <details class="tegata">
+      <summary>この入口の越え方 — 米国内限定の品を、日本の自分へ届ける<span class="tw">›</span></summary>
+      <div class="body">
+        <p>PicClickで見つかる「米国内のみ発送」の品は、日本の住所に直接は送れません。
+        <b>間に、米国の受け取り拠点（転送サービス）</b>を挟むことで、日本まで届けられます。</p>
+        <ol>
+          <li><b>PicClickで探す。</b>欲しい品を見つけ、そのeBayページを開く。</li>
+          <li><b>米国の受け取り住所を用意する。</b>転送サービス（MyUS など）に無料登録すると、自分専用の米国住所（Suite番号つき）がもらえる。</li>
+          <li><b>その米国住所へ送ってもらう。</b>eBayでの発送先に、下の表のとおり正確に入力する。<b>Suite番号を落とすと荷物が迷子になる。</b></li>
+          <li><b>米国拠点から日本へ転送する。</b>荷物が届いたら、転送サービスの画面で「日本へ発送」を自分で指示し、国際送料を支払う。</li>
+        </ol>
+
+        <div class="suite-box">
+          <b><span class="kw">Suite番号</span>とは？</b><br>
+          <b>転送サービス（MyUS など）に登録すると</b>、住所とセットで <span class="kw">Suite JP0000</span> のような
+          <b>自分だけの番号</b>がもらえます。倉庫には世界中の荷物が届くので、
+          <b>「どれがあなたの荷物か」を見分ける名札</b>がこの番号です。
+          住所は他の利用者と共通、番号だけが自分専用。<b>これが抜けると、届いても受け取れません。</b>
+        </div>
+
+        <div class="addr-cap">米国住所の入れ方 <span>（登録時にもらう住所を、eBayの発送先の各欄へ）</span></div>
+        <table class="addr-table">
+          <tr><th>入力欄</th><th>入れるもの（例）</th></tr>
+          <tr><td>Address line 1</td><td>1200 Getty Center Dr</td></tr>
+          <tr class="hi"><td>Address line 2</td><td>Suite JP0000 ← 必ず</td></tr>
+          <tr><td>City</td><td>Los Angeles</td></tr>
+          <tr><td>State</td><td>CA（＝カリフォルニア州）</td></tr>
+          <tr><td>ZIP code</td><td>90049</td></tr>
+          <tr><td>Country</td><td>United States</td></tr>
+        </table>
+        <p class="addr-note">
+          ※ 住所・番号は登録後にもらう<b>自分のもの</b>を使う（上はロサンゼルスを使った書式の例）。<br>
+          ※ <b>State は州の略号</b>（カリフォルニア＝CA、ニューヨーク＝NY、フロリダ＝FL）。もらった住所のとおりに。<br>
+          ※ 1行しか無いフォームなら <b>「1200 Getty Center Dr, Suite JP0000」</b> と一行にまとめる。<br>
+          ※ 電話番号は日本の番号で可。頭の 0 を取り、国番号 <b>+81</b> を付ける（例 090-1234-5678 → +81 90 1234 5678）。
+        </p>
+
+        <div class="caution">
+          <b>渡る前に、二つだけ</b>
+          ・<b>個人で使う分だけ。</b>この方法で入れた品を売る・譲るのは、国内の法律で認められていません。<br>
+          ・<b>スプレー缶など</b>は危険物として送れないことがある。固形・液体でも中身によっては要確認。
+        </div>
+
+        <p class="stub">※ 各手順の細かいコツ（住所の書き方、状態の見極め、費用の目安、税関のこと）は、実体験をもとに順次ここへ書き足していきます。 — 編集中</p>
+      </div>
+    </details>
+  </section>
+
+</div>
+
+<footer>
+  <p>
+    玄関 GENKAN <span class="ver">v0.1</span><br>
+    海外の欲しいものへ、迷わず入るための入口。<br>
+    商品はここでは売りません。あなたを、正しい入口へ案内するだけ。
+  </p>
+</footer>
+
+<script>
+  (function(){
+    var q = document.getElementById('q');
+    var go = document.getElementById('go');
+    var hint = document.getElementById('hint');
+    var doors = document.querySelectorAll('.door[data-tpl]');
+    doors.forEach(function(d){ d.dataset.home = d.getAttribute('href'); });
+
+    function escapeHtml(s){
+      return s.replace(/[&<>"']/g,function(c){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+      });
+    }
+    function applySearch(word){
+      var w = (word||'').trim();
+      if(!w){ clearSearch(); return; }
+      var enc = encodeURIComponent(w);
+      doors.forEach(function(d){ d.setAttribute('href', d.dataset.tpl.replace('%s', enc)); });
+      document.body.classList.add('searching');
+      hint.innerHTML = '「<b>'+escapeHtml(w)+'</b>」で各入口を検索します。入口を押すと、そのサイトの検索結果が新しいタブで開きます。 <button class="clearbtn" id="clr">検索をやめる</button>';
+      var clr = document.getElementById('clr');
+      if(clr) clr.addEventListener('click', function(){ q.value=''; clearSearch(); q.focus(); });
+    }
+    function clearSearch(){
+      doors.forEach(function(d){ d.setAttribute('href', d.dataset.home); });
+      document.body.classList.remove('searching');
+      hint.textContent = '言葉を入れて「探す」を押すと、各入口がその検索リンクに変わります。';
+    }
+    go.addEventListener('click', function(){ applySearch(q.value); });
+    q.addEventListener('keydown', function(e){ if(e.key==='Enter') applySearch(q.value); });
+    q.addEventListener('input', function(){ if(q.value.trim()==='') clearSearch(); });
+  })();
+</script>
+
+</body>
+</html>
